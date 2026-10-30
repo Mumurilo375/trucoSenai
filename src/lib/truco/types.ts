@@ -21,6 +21,8 @@ export type GameState = {
   elevenDecision: Player|null;
   rematch: Record<Player, boolean>;
   winner: Player|null;
+  endReason: 'score'|'forfeit'|null;
+  forfeitedBy: Player|null;
   dealId: string;
   lastEvent: { id: string; type: string; text: string; at: number } | null;
   seenActions: string[];
