@@ -10,6 +10,7 @@ export type GameState = {
   vira: Card | null;
   trick: TrickPlay[];
   tricks: (Player|'tie'|null)[];
+  lastTrick: { id: string; plays: TrickPlay[]; results: (Player|'tie')[]; winner: Player|'tie'; index: number; vira: Card; handValue: number } | null;
   turn: Player;
   handStarter: Player;
   trickStarter: Player;
