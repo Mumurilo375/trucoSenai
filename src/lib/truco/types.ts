@@ -1,0 +1,26 @@
+export type Suit = 'paus' | 'copas' | 'espadas' | 'ouros';
+export type Rank = '4'|'5'|'6'|'7'|'Q'|'J'|'K'|'A'|'2'|'3';
+export type Card = { id: string; rank: Rank; suit: Suit };
+export type Player = 'host' | 'guest';
+export type TrickPlay = { player: Player; card: Card | null; covered: boolean };
+export type GameState = {
+  status: 'waiting'|'playing'|'finished';
+  hands: Record<Player, Card[]>;
+  scores: Record<Player, number>;
+  vira: Card | null;
+  trick: TrickPlay[];
+  tricks: (Player|'tie'|null)[];
+  turn: Player;
+  handStarter: Player;
+  trickStarter: Player;
+  handValue: number;
+  proposal: { from: Player; to: Player; value: number; previous: number } | null;
+  handEleven: 'host'|'guest'|'iron'|null;
+  elevenDecision: Player|null;
+  rematch: Record<Player, boolean>;
+  winner: Player|null;
+  dealId: string;
+  lastEvent: { id: string; type: string; text: string; at: number } | null;
+  seenActions: string[];
+};
+export type PublicRoom = { code:string; version:number; names:Record<Player,string>; me:Player; state: Omit<GameState,'hands'|'seenActions'> & { hand: Card[]; hiddenSlots:number; opponentCount:number; opponentPlays:TrickPlay[] } };

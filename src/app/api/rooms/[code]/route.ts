@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server';
+import { adminClient, sessionClient } from '@/lib/supabase/server';
+import { sanitize } from '@/lib/truco/engine';
+import { seatForUser } from '@/lib/truco/access';
+export const runtime='nodejs';export const dynamic='force-dynamic';
+export async function GET(_req:Request,{params}:{params:Promise<{code:string}>}){try{const {code}=await params,auth=await sessionClient(),{data:{user}}=await auth.auth.getUser();if(!user)return NextResponse.json({error:'Sessão expirada.'},{status:401});const {data:room,error}=await adminClient().from('rooms').select('code,version,host_user_id,guest_user_id,host_name,guest_name,game_state').eq('code',code.toUpperCase()).maybeSingle();if(error||!room)return NextResponse.json({error:'Sala não encontrada.'},{status:404});const me=seatForUser(user.id,room.host_user_id,room.guest_user_id);if(!me)return NextResponse.json({error:'Você não pertence a esta sala.'},{status:403});return NextResponse.json({room:sanitize(room.game_state,me,room.code,room.version,{host:room.host_name,guest:room.guest_name||'Aguardando…'}),joined:!!room.guest_user_id},{headers:{'Cache-Control':'no-store, max-age=0'}});}catch(e){return NextResponse.json({error:e instanceof Error?e.message:'Erro inesperado.'},{status:500});}}
