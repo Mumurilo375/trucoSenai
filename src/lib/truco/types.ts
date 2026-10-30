@@ -11,6 +11,7 @@ export type GameState = {
   trick: TrickPlay[];
   tricks: (Player|'tie')[];
   lastTrick: { id: string; plays: TrickPlay[]; results: (Player|'tie')[]; winner: Player|'tie'; index: number; vira: Card; handValue: number } | null;
+  lastChat: { id: string; from: Player; message: string; sentAt: number } | null;
   turn: Player;
   handStarter: Player;
   trickStarter: Player;

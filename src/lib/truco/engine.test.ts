@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { applyAction, compare, deck, manilhaRank, newGame, sanitize, shuffle } from './engine';
 import { seatForUser } from './access';
 import type { Card, GameState, Player } from './types';
@@ -20,6 +20,7 @@ describe('vazas, turno e mão',()=>{
  it('reconhece assento apenas para os dois membros',()=>{expect(seatForUser('h','h',null)).toBe('host');expect(seatForUser('g','h','g')).toBe('guest');expect(seatForUser('x','h','g')).toBeNull();});
 });
 describe('pedidos e pontuação',()=>{
+ it('envia chat só ao adversário, limita o texto e o expira',()=>{const s=state(),sent=applyAction(s,'host',{id:'chat-action-1',type:'chat',message:'Boa rodada!'});expect(s.lastChat).toBeNull();expect(sanitize(sent,'host','ABC234',2,{host:'A',guest:'B'}).state.lastChat).toBeNull();expect(sanitize(sent,'guest','ABC234',2,{host:'A',guest:'B'}).state.lastChat?.message).toBe('Boa rodada!');expect(()=>applyAction(s,'host',{id:'chat-empty-1',type:'chat',message:'  '})).toThrow();expect(()=>applyAction(s,'host',{id:'chat-long-1',type:'chat',message:'x'.repeat(141)})).toThrow();vi.spyOn(Date,'now').mockReturnValue(sent.lastChat!.sentAt+7000);expect(sanitize(sent,'guest','ABC234',3,{host:'A',guest:'B'}).state.lastChat).toBeNull();vi.restoreAllMocks();});
  it('aceita Truco, aumenta para seis e permite correr pelo valor anterior',()=>{let s=state();s=act(s,'host','truco');expect(s.proposal?.value).toBe(3);s=act(s,'guest','raise');expect(s.proposal?.value).toBe(6);s=act(s,'host','fold');expect(s.scores.guest).toBe(3);});
  it('aguarda resposta à proposta e não aplica a mesma carta duas vezes',()=>{let s=state();s=act(s,'host','truco');expect(()=>act(s,'host','play',{cardId:'3-paus'})).toThrow();s=act(s,'guest','accept');expect(s.handValue).toBe(3);const id=crypto.randomUUID();s=applyAction(s,'host',{id,type:'play',cardId:'3-paus'});expect(()=>applyAction(s,'host',{id:crypto.randomUUID(),type:'play',cardId:'3-paus'})).toThrow();});
  it('avança 3, 6, 9, 12 e bloqueia outro aumento',()=>{let s=state();for(const value of [3,6,9,12]){s=act(s,s.turn,'truco');expect(s.proposal?.value).toBe(value);s=act(s,s.proposal!.to,'accept');s.turn='host';}expect(()=>act(s,'host','truco')).toThrow();});
